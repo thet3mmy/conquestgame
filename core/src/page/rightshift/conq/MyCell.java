@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 public class MyCell extends Cell {
     public Vector2 pos;
     public int owner;
+    public String displayName;
     public void turnEnded() {return;}
     public void renderStuff() {return;}
 
@@ -13,5 +14,9 @@ public class MyCell extends Cell {
         super();
         pos = p;
         owner = o;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 }

@@ -11,8 +11,9 @@ public class Town extends MyCell {
     public int population;
     public int food;
     public int size = 1;
-    private int turnsAlive = 0;
+    public int turnsAlive = 0;
     public int nextGrowth = -999;
+    public LinkedList<ProductionItem> queue;
 
     Town(Vector2 p, int o, TiledMapTile t) {
         super(p, o);
@@ -34,6 +35,10 @@ public class Town extends MyCell {
                 }
             }
         }
+
+        displayName = "Town";
+        queue = new LinkedList<>();
+
     }
 
     public LinkedList<Cell> getAdjacentCells() {
@@ -70,7 +75,7 @@ public class Town extends MyCell {
         if(turnsAlive >= nextGrowth) {
             population++;
             nextGrowth = turnsAlive + turnsToGrow;
-            if(population % 5 == 0) {
+            if(population % 10 == 0) {
                 size++;
             }
         }
@@ -81,10 +86,32 @@ public class Town extends MyCell {
         turnsAlive++;
         food = calculateAvailableFood();
         growPopulation();
+        for(ProductionItem it: new LinkedList<>(queue)) {
+            it.progress++;
+            if(it.progress >= it.complete) {
+                try {
+                    int x = (int)pos.x;
+                    int y = (int)pos.y;
+
+                    Unit u = it.produce();
+                    Game.updateCells.add(u);
+                    Game.unitLayer.setCell(x, y, u);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void produce(Class<? extends Unit> c) {
+        ProductionItem it = new ProductionItem(turnsAlive, 5, c, this);
+        queue.add(it);
+        int index = queue.indexOf(it);
+        it.complete += index * 2;
     }
 
     @Override
     public void renderStuff() {
-        Game.font.draw(Game.batch, String.valueOf(population), pos.x * 64, pos.y * 64 + 12);
+        UIManager.font.draw(Game.batch, String.valueOf(population), pos.x * 64, pos.y * 64 + 12);
     }
 }
